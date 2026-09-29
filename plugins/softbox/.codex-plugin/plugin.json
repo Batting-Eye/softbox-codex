@@ -1,0 +1,37 @@
+{
+  "name": "softbox",
+  "version": "0.1.0",
+  "description": "Generate the images you requested in Softbox with your own Codex.",
+  "author": {
+    "name": "Softbox",
+    "url": "https://softbox-capture.vercel.app"
+  },
+  "homepage": "https://softbox-capture.vercel.app/codex",
+  "license": "UNLICENSED",
+  "keywords": [
+    "softbox",
+    "webtoon",
+    "image generation"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Softbox",
+    "shortDescription": "Softbox에서 요청한 이미지를 내 Codex로 만들어요",
+    "longDescription": "Softbox 웹에서 요청한 얼굴 탐색 같은 생성 작업을 받아, Codex 기본 이미지 생성으로 만들고 결과를 Softbox에 바로 올려요. 처음 한 번 계정을 연결하면 돼요.",
+    "developerName": "Softbox",
+    "category": "Productivity",
+    "capabilities": [
+      "Write"
+    ],
+    "websiteURL": "https://softbox-capture.vercel.app",
+    "defaultPrompt": [
+      "Softbox 계정 연결해 줘",
+      "Softbox 대기 작업 처리해 줘",
+      "Softbox 연결 상태 알려 줘"
+    ],
+    "brandColor": "#63A7FF",
+    "composerIcon": "./assets/icon.png",
+    "logo": "./assets/logo.png"
+  }
+}
