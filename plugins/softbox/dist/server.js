@@ -2236,10 +2236,10 @@ var require_resolve = __commonJS({
       }
       return count;
     }
-    function getFullPath(resolver, id = "", normalize) {
+    function getFullPath(resolver, id2 = "", normalize) {
       if (normalize !== false)
-        id = normalizeId(id);
-      const p = resolver.parse(id);
+        id2 = normalizeId(id2);
+      const p = resolver.parse(id2);
       return _getFullPath(resolver, p);
     }
     exports.getFullPath = getFullPath;
@@ -2249,13 +2249,13 @@ var require_resolve = __commonJS({
     }
     exports._getFullPath = _getFullPath;
     var TRAILING_SLASH_HASH = /#\/?$/;
-    function normalizeId(id) {
-      return id ? id.replace(TRAILING_SLASH_HASH, "") : "";
+    function normalizeId(id2) {
+      return id2 ? id2.replace(TRAILING_SLASH_HASH, "") : "";
     }
     exports.normalizeId = normalizeId;
-    function resolveUrl(resolver, baseId, id) {
-      id = normalizeId(id);
-      return resolver.resolve(baseId, id);
+    function resolveUrl(resolver, baseId, id2) {
+      id2 = normalizeId(id2);
+      return resolver.resolve(baseId, id2);
     }
     exports.resolveUrl = resolveUrl;
     var ANCHOR = /^[a-z_][-a-z0-9._]*$/i;
@@ -3025,8 +3025,8 @@ var require_compile = __commonJS({
       if (Object.keys(root.schema).length > 0 && refPath === baseId) {
         return getJsonPointer.call(this, p, root);
       }
-      const id = (0, resolve_1.normalizeId)(refPath);
-      const schOrRef = this.refs[id] || this.schemas[id];
+      const id2 = (0, resolve_1.normalizeId)(refPath);
+      const schOrRef = this.refs[id2] || this.schemas[id2];
       if (typeof schOrRef == "string") {
         const sch = resolveSchema.call(this, root, schOrRef);
         if (typeof (sch === null || sch === void 0 ? void 0 : sch.schema) !== "object")
@@ -3037,7 +3037,7 @@ var require_compile = __commonJS({
         return;
       if (!schOrRef.validate)
         compileSchema.call(this, schOrRef);
-      if (id === (0, resolve_1.normalizeId)(ref)) {
+      if (id2 === (0, resolve_1.normalizeId)(ref)) {
         const { schema } = schOrRef;
         const { schemaId } = this.opts;
         const schId = schema[schemaId];
@@ -4464,15 +4464,15 @@ var require_core = __commonJS({
             this.addSchema(sch, void 0, _meta, _validateSchema);
           return this;
         }
-        let id;
+        let id2;
         if (typeof schema === "object") {
           const { schemaId } = this.opts;
-          id = schema[schemaId];
-          if (id !== void 0 && typeof id != "string") {
+          id2 = schema[schemaId];
+          if (id2 !== void 0 && typeof id2 != "string") {
             throw new Error(`schema ${schemaId} must be string`);
           }
         }
-        key = (0, resolve_1.normalizeId)(key || id);
+        key = (0, resolve_1.normalizeId)(key || id2);
         this._checkUnique(key);
         this.schemas[key] = this._addSchema(schema, _meta, key, _validateSchema, true);
         return this;
@@ -4551,11 +4551,11 @@ var require_core = __commonJS({
           case "object": {
             const cacheKey = schemaKeyRef;
             this._cache.delete(cacheKey);
-            let id = schemaKeyRef[this.opts.schemaId];
-            if (id) {
-              id = (0, resolve_1.normalizeId)(id);
-              delete this.schemas[id];
-              delete this.refs[id];
+            let id2 = schemaKeyRef[this.opts.schemaId];
+            if (id2) {
+              id2 = (0, resolve_1.normalizeId)(id2);
+              delete this.schemas[id2];
+              delete this.refs[id2];
             }
             return this;
           }
@@ -4626,7 +4626,7 @@ var require_core = __commonJS({
       errorsText(errors = this.errors, { separator = ", ", dataVar = "data" } = {}) {
         if (!errors || errors.length === 0)
           return "No errors";
-        return errors.map((e) => `${dataVar}${e.instancePath} ${e.message}`).reduce((text2, msg) => text2 + separator + msg);
+        return errors.map((e) => `${dataVar}${e.instancePath} ${e.message}`).reduce((text3, msg) => text3 + separator + msg);
       }
       $dataMetaSchema(metaSchema, keywordsJsonPointers) {
         const rules = this.RULES.all;
@@ -4662,10 +4662,10 @@ var require_core = __commonJS({
         }
       }
       _addSchema(schema, meta3, baseId, validateSchema = this.opts.validateSchema, addSchema = this.opts.addUsedSchema) {
-        let id;
+        let id2;
         const { schemaId } = this.opts;
         if (typeof schema == "object") {
-          id = schema[schemaId];
+          id2 = schema[schemaId];
         } else {
           if (this.opts.jtd)
             throw new Error("schema must be object");
@@ -4675,7 +4675,7 @@ var require_core = __commonJS({
         let sch = this._cache.get(schema);
         if (sch !== void 0)
           return sch;
-        baseId = (0, resolve_1.normalizeId)(id || baseId);
+        baseId = (0, resolve_1.normalizeId)(id2 || baseId);
         const localRefs = resolve_1.getSchemaRefs.call(this, schema, baseId);
         sch = new compile_1.SchemaEnv({ schema, schemaId, meta: meta3, baseId, localRefs });
         this._cache.set(sch.schema, sch);
@@ -4688,9 +4688,9 @@ var require_core = __commonJS({
           this.validateSchema(schema, true);
         return sch;
       }
-      _checkUnique(id) {
-        if (this.schemas[id] || this.refs[id]) {
-          throw new Error(`schema with key or id "${id}" already exists`);
+      _checkUnique(id2) {
+        if (this.schemas[id2] || this.refs[id2]) {
+          throw new Error(`schema with key or id "${id2}" already exists`);
         }
       }
       _compileSchemaEnv(sch) {
@@ -14411,15 +14411,15 @@ var $ZodObjectJIT = /* @__PURE__ */ $constructor("$ZodObjectJIT", (inst, def) =>
     const syms = normalized.symbolKeys;
     const doc = new Doc(["payload", "ctx"], { shape, inst, memo: memo2, syms });
     const parseStr = (k) => `shape[${k}]._zod.run({ value: input[${k}], issues: [] }, ctx)`;
-    const prefixStr = (id, k) => `
-          let ${id}_ab = false;
-          for (let i = 0; i < ${id}.issues.length; i++) {
-            const iss = ${id}.issues[i];
+    const prefixStr = (id2, k) => `
+          let ${id2}_ab = false;
+          for (let i = 0; i < ${id2}.issues.length; i++) {
+            const iss = ${id2}.issues[i];
             iss.path = iss.path ? [${k}, ...iss.path] : [${k}];
             payload.issues.push(iss);
-            if (iss.continue !== true) ${id}_ab = true;
+            if (iss.continue !== true) ${id2}_ab = true;
           }
-          if (${id}_ab && ctx && ctx.abortEarly) {
+          if (${id2}_ab && ctx && ctx.abortEarly) {
             payload.value = newResult;
             return payload;
           }`;
@@ -14433,34 +14433,34 @@ var $ZodObjectJIT = /* @__PURE__ */ $constructor("$ZodObjectJIT", (inst, def) =>
     for (const key of normalized.allKeys) {
       if (key === "__proto__")
         continue;
-      const id = ids[key];
+      const id2 = ids[key];
       const k = typeof key === "symbol" ? `syms[${syms.indexOf(key)}]` : esc(key);
       const isPresent = `${k} in input`;
       const schema = shape[key];
       const optin = schema?._zod?.optin;
       const isOptionalIn = optin !== void 0;
       const isOptionalOut = schema?._zod?.optout === "optional";
-      doc.write(`const ${id} = ${parseStr(k)};`);
+      doc.write(`const ${id2} = ${parseStr(k)};`);
       if (isOptionalIn && isOptionalOut) {
-        const assign = optin === "optional" ? `${id}_present` : `${id}.value !== undefined || ${id}_present`;
+        const assign = optin === "optional" ? `${id2}_present` : `${id2}.value !== undefined || ${id2}_present`;
         doc.write(`
-        const ${id}_present = ${isPresent};
-        if (!${id}.issues.length || ${id}_present) {
-          if (${id}.issues.length) {${prefixStr(id, k)}
+        const ${id2}_present = ${isPresent};
+        if (!${id2}.issues.length || ${id2}_present) {
+          if (${id2}.issues.length) {${prefixStr(id2, k)}
           }
 
           if (${assign}) {
-            newResult[${k}] = ${id}.value;
+            newResult[${k}] = ${id2}.value;
           }
         }
 
       `);
       } else if (!isOptionalIn) {
         doc.write(`
-        const ${id}_present = ${isPresent};
-        if (${id}.issues.length) {${prefixStr(id, k)}
+        const ${id2}_present = ${isPresent};
+        if (${id2}.issues.length) {${prefixStr(id2, k)}
         }
-        if (!${id}_present && !${id}.issues.length) {
+        if (!${id2}_present && !${id2}.issues.length) {
           payload.issues.push({
             code: "invalid_type",
             expected: "nonoptional",
@@ -14473,22 +14473,22 @@ var $ZodObjectJIT = /* @__PURE__ */ $constructor("$ZodObjectJIT", (inst, def) =>
           }
         }
 
-        if (${id}_present) {
-          newResult[${k}] = ${id}.value;
+        if (${id2}_present) {
+          newResult[${k}] = ${id2}.value;
         }
 
       `);
       } else {
         doc.write(`
-        if (${id}.issues.length) {${prefixStr(id, k)}
+        if (${id2}.issues.length) {${prefixStr(id2, k)}
         }
       `);
         if (optin === "defaulted") {
-          doc.write(`newResult[${k}] = ${id}.value;`);
+          doc.write(`newResult[${k}] = ${id2}.value;`);
         } else {
           doc.write(`
-        if (${id}.value !== undefined || ${isPresent}) {
-          newResult[${k}] = ${id}.value;
+        if (${id2}.value !== undefined || ${isPresent}) {
+          newResult[${k}] = ${id2}.value;
         }
       `);
         }
@@ -20141,8 +20141,8 @@ function ko_default() {
 }
 
 // ../../node_modules/.pnpm/zod@4.6.5/node_modules/zod/v4/locales/lt.js
-var capitalizeFirstCharacter = (text2) => {
-  return text2.charAt(0).toUpperCase() + text2.slice(1);
+var capitalizeFirstCharacter = (text3) => {
+  return text3.charAt(0).toUpperCase() + text3.slice(1);
 };
 function getUnitTypeFromNumber(number4) {
   const abs = Math.abs(number4);
@@ -26506,26 +26506,26 @@ function extractDefs(ctx, schema) {
     return;
   const idToSchema = /* @__PURE__ */ new Map();
   for (const entry of ctx.seen.entries()) {
-    const id = ctx.metadataRegistry.get(entry[0])?.id;
-    if (id) {
-      const existing = idToSchema.get(id);
+    const id2 = ctx.metadataRegistry.get(entry[0])?.id;
+    if (id2) {
+      const existing = idToSchema.get(id2);
       if (existing && existing !== entry[0]) {
-        throw new Error(`Duplicate schema id "${id}" detected during JSON Schema conversion. Two different schemas cannot share the same id when converted together.`);
+        throw new Error(`Duplicate schema id "${id2}" detected during JSON Schema conversion. Two different schemas cannot share the same id when converted together.`);
       }
-      idToSchema.set(id, entry[0]);
+      idToSchema.set(id2, entry[0]);
     }
   }
   const makeURI = (entry) => {
     const defsSegment = ctx.target === "draft-2020-12" ? "$defs" : "definitions";
     if (ctx.external) {
       const externalId = ctx.external.registry.get(entry[0])?.id;
-      const uriGenerator = ctx.external.uri ?? ((id2) => id2);
+      const uriGenerator = ctx.external.uri ?? ((id3) => id3);
       if (externalId) {
         return { ref: uriGenerator(externalId) };
       }
-      const id = entry[1].defId ?? entry[1].schema.id ?? `schema${ctx.counter++}`;
-      entry[1].defId = id;
-      return { defId: id, ref: `${uriGenerator("__shared")}#/${defsSegment}/${encodeJSONPointerSegment(id)}` };
+      const id2 = entry[1].defId ?? entry[1].schema.id ?? `schema${ctx.counter++}`;
+      entry[1].defId = id2;
+      return { defId: id2, ref: `${uriGenerator("__shared")}#/${defsSegment}/${encodeJSONPointerSegment(id2)}` };
     }
     const uriPrefix = `#`;
     const defUriPrefix = `${uriPrefix}/${defsSegment}/`;
@@ -26573,8 +26573,8 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
         continue;
       }
     }
-    const id = ctx.metadataRegistry.get(entry[0])?.id;
-    if (id) {
+    const id2 = ctx.metadataRegistry.get(entry[0])?.id;
+    if (id2) {
       extractToDef(entry);
       continue;
     }
@@ -26807,10 +26807,10 @@ function finalize(ctx, schema) {
   } else {
   }
   if (ctx.external?.uri) {
-    const id = ctx.external.registry.get(schema)?.id;
-    if (!id)
+    const id2 = ctx.external.registry.get(schema)?.id;
+    if (!id2)
       throw new Error("Schema is missing an `id` property");
-    result.$id = ctx.external.uri(id);
+    result.$id = ctx.external.uri(id2);
   }
   assignProps(result, root.defId ? root.schema : root.def ?? root.schema);
   const rootMetaId = ctx.metadataRegistry.get(schema)?.id;
@@ -27416,7 +27416,7 @@ function stringifyKeyNames(bySchema, json2, visited) {
   const values = json2.enum ?? (json2.const !== void 0 ? [json2.const] : void 0);
   if (!numericType && !values?.some((v) => typeof v === "number"))
     return json2;
-  const { minimum, maximum, exclusiveMinimum, exclusiveMaximum, multipleOf, format, id, ...rest } = json2;
+  const { minimum, maximum, exclusiveMinimum, exclusiveMaximum, multipleOf, format, id: id2, ...rest } = json2;
   if (rest.enum)
     rest.enum = rest.enum.map((v) => typeof v === "number" ? String(v) : v);
   else if (typeof rest.const === "number")
@@ -27476,13 +27476,13 @@ var recordProcessor = (schema, ctx, _json, params) => {
         ...params,
         path: [...params.path, "propertyNames"]
       });
-      let pending2 = pendingRecords.get(ctx);
-      if (!pending2) {
-        pending2 = [];
-        pendingRecords.set(ctx, pending2);
+      let pending = pendingRecords.get(ctx);
+      if (!pending) {
+        pending = [];
+        pendingRecords.set(ctx, pending);
         ctx.deferred.push(() => rewriteKeyNames(ctx));
       }
-      pending2.push(schema);
+      pending.push(schema);
     }
     json2.additionalProperties = processSchema(def.valueType, ctx, {
       ...params,
@@ -27827,7 +27827,7 @@ function visit(schema, fnOrHandlers) {
     return h ? h(node2, rewritten) : node2;
   };
   const cache = /* @__PURE__ */ new Map();
-  function run(s) {
+  function run2(s) {
     const cached2 = cache.get(s);
     if (cached2 === RESOLVING) {
       return new $ZodLazy({
@@ -27853,21 +27853,21 @@ function visit(schema, fnOrHandlers) {
         let changed = false;
         const newShape = {};
         for (const k of keys) {
-          const mapped = run(oldShape[k]);
+          const mapped = run2(oldShape[k]);
           if (mapped !== oldShape[k])
             changed = true;
           newShape[k] = mapped;
         }
         let newCatchall = def.catchall;
         if (def.catchall) {
-          newCatchall = run(def.catchall);
+          newCatchall = run2(def.catchall);
           if (newCatchall !== def.catchall)
             changed = true;
         }
         return changed ? clone(s, { ...def, shape: newShape, catchall: newCatchall }) : s;
       }
       case "array": {
-        const mapped = run(def.element);
+        const mapped = run2(def.element);
         return mapped === def.element ? s : clone(s, { ...def, element: mapped });
       }
       case "tuple": {
@@ -27875,14 +27875,14 @@ function visit(schema, fnOrHandlers) {
         let changed = false;
         const newItems = [];
         for (const item of oldItems) {
-          const mapped = run(item);
+          const mapped = run2(item);
           if (mapped !== item)
             changed = true;
           newItems.push(mapped);
         }
         let newRest = def.rest;
         if (def.rest) {
-          newRest = run(def.rest);
+          newRest = run2(def.rest);
           if (newRest !== def.rest)
             changed = true;
         }
@@ -27890,12 +27890,12 @@ function visit(schema, fnOrHandlers) {
       }
       case "record":
       case "map": {
-        const newKey = run(def.keyType);
-        const newVal = run(def.valueType);
+        const newKey = run2(def.keyType);
+        const newVal = run2(def.valueType);
         return newKey === def.keyType && newVal === def.valueType ? s : clone(s, { ...def, keyType: newKey, valueType: newVal });
       }
       case "set": {
-        const newVal = run(def.valueType);
+        const newVal = run2(def.valueType);
         return newVal === def.valueType ? s : clone(s, { ...def, valueType: newVal });
       }
       case "union": {
@@ -27903,7 +27903,7 @@ function visit(schema, fnOrHandlers) {
         let changed = false;
         const newOptions = [];
         for (const opt of oldOptions) {
-          const mapped = run(opt);
+          const mapped = run2(opt);
           if (mapped !== opt)
             changed = true;
           newOptions.push(mapped);
@@ -27911,8 +27911,8 @@ function visit(schema, fnOrHandlers) {
         return changed ? clone(s, { ...def, options: newOptions }) : s;
       }
       case "intersection": {
-        const newLeft = run(def.left);
-        const newRight = run(def.right);
+        const newLeft = run2(def.left);
+        const newRight = run2(def.right);
         return newLeft === def.left && newRight === def.right ? s : clone(s, { ...def, left: newLeft, right: newRight });
       }
       case "optional":
@@ -27924,23 +27924,23 @@ function visit(schema, fnOrHandlers) {
       case "nonoptional":
       case "promise":
       case "success": {
-        const newInner = run(def.innerType);
+        const newInner = run2(def.innerType);
         return newInner === def.innerType ? s : clone(s, { ...def, innerType: newInner });
       }
       case "pipe": {
-        const newIn = run(def.in);
-        const newOut = run(def.out);
+        const newIn = run2(def.in);
+        const newOut = run2(def.out);
         return newIn === def.in && newOut === def.out ? s : clone(s, { ...def, in: newIn, out: newOut });
       }
       case "function": {
-        const newInput = run(def.input);
-        const newOutput = run(def.output);
+        const newInput = run2(def.input);
+        const newOutput = run2(def.output);
         return newInput === def.input && newOutput === def.output ? s : clone(s, { ...def, input: newInput, output: newOutput });
       }
       case "lazy": {
         const original = def.getter;
         const { _cachedInner, ...rest } = def;
-        return clone(s, { ...rest, getter: () => run(original()) });
+        return clone(s, { ...rest, getter: () => run2(original()) });
       }
       // A leaf by choice: `parts` are regex fragments, not data positions.
       case "template_literal":
@@ -27971,7 +27971,7 @@ function visit(schema, fnOrHandlers) {
       }
     }
   }
-  return run(schema);
+  return run2(schema);
 }
 
 // ../../node_modules/.pnpm/@modelcontextprotocol+sdk@1.30.1_zod@4.6.5/node_modules/@modelcontextprotocol/sdk/dist/esm/server/zod-compat.js
@@ -34961,7 +34961,7 @@ var ExperimentalServerTasks = class {
       if (hasPreviousToolUse) {
         const toolUseIds = new Set(previousContent.filter((c) => c.type === "tool_use").map((c) => c.id));
         const toolResultIds = new Set(lastContent.filter((c) => c.type === "tool_result").map((c) => c.toolUseId));
-        if (toolUseIds.size !== toolResultIds.size || ![...toolUseIds].every((id) => toolResultIds.has(id))) {
+        if (toolUseIds.size !== toolResultIds.size || ![...toolUseIds].every((id2) => toolResultIds.has(id2))) {
           throw new Error("ids of tool_result blocks and tool_use blocks from previous message do not match");
         }
       }
@@ -35386,7 +35386,7 @@ var Server = class extends Protocol {
       if (hasPreviousToolUse) {
         const toolUseIds = new Set(previousContent.filter((c) => c.type === "tool_use").map((c) => c.id));
         const toolResultIds = new Set(lastContent.filter((c) => c.type === "tool_result").map((c) => c.toolUseId));
-        if (toolUseIds.size !== toolResultIds.size || ![...toolUseIds].every((id) => toolResultIds.has(id))) {
+        if (toolUseIds.size !== toolResultIds.size || ![...toolUseIds].every((id2) => toolResultIds.has(id2))) {
           throw new Error("ids of tool_result blocks and tool_use blocks from previous message do not match");
         }
       }
@@ -36599,29 +36599,285 @@ var FaceVariationRequestSchema = external_exports.object({
   count: external_exports.number().int().min(1).max(LIMITS.requestedImagesMax)
 }).refine((request) => Object.keys(request.parts).length + 1 <= LIMITS.referenceImagesMax, "too many reference images");
 
+// ../../packages/shared/dist/story.js
+var STORY_EVENT_KINDS = ["prologue", "main", "sub", "main_ending", "sub_ending"];
+var DIRECTION_MODES = ["auto", "directed"];
+var CHARACTER_ROLES = ["lead", "support"];
+var AGE_RATINGS = ["all", "adult"];
+var VIEW_MODES = ["page", "scroll"];
+var id = external_exports.string().min(1).max(40).regex(/^[A-Za-z0-9_-]+$/);
+var text = external_exports.string();
+var StoryBasicSchema = external_exports.object({
+  title: text,
+  intro: text,
+  genres: external_exports.array(external_exports.enum(GENRES)),
+  tags: external_exports.array(text),
+  ageRating: external_exports.enum(AGE_RATINGS),
+  viewMode: external_exports.enum(VIEW_MODES)
+});
+var StoryWorldSchema = external_exports.object({
+  sections: external_exports.object({
+    goal: text,
+    background: text,
+    settings: text,
+    responseRules: text,
+    cautions: text
+  }),
+  ai: external_exports.object({
+    // 스튜디오의 AI 모델 이름. 고르지 않았으면 null
+    model: external_exports.string().nullable(),
+    minimizeUserLines: external_exports.boolean()
+  })
+});
+var StoryCharacterSchema = external_exports.object({
+  id,
+  name: text,
+  role: external_exports.enum(CHARACTER_ROLES),
+  profile: external_exports.object({
+    appearance: text,
+    personality: text,
+    speech: text,
+    userRelation: text,
+    otherRelations: text
+  }),
+  speechExamples: external_exports.array(text),
+  intro: text
+});
+var StoryEventSchema = external_exports.object({
+  id,
+  kind: external_exports.enum(STORY_EVENT_KINDS),
+  name: text,
+  // 프롤로그는 트리거 없이 시작해요.
+  trigger: text,
+  direction: external_exports.object({
+    mode: external_exports.enum(DIRECTION_MODES),
+    // 자동 생성일 때 연출 방향
+    note: text,
+    // 직접 연출(프롤로그 포함)의 연출 씬. 한 줄이 한 프레임이에요.
+    frames: external_exports.array(text),
+    choices: external_exports.array(text)
+  }),
+  mission: text,
+  guide: external_exports.object({
+    start: text,
+    goal: text,
+    notYet: text,
+    incident: text,
+    convergence: text
+  }),
+  // 다음 이벤트 id. 수렴이 다음 이벤트의 트리거를 준비해요.
+  next: external_exports.array(id),
+  // 메인 엔딩만. 엔딩 뒤 이어하기에서 세계관을 대신해요.
+  endingPrompt: text
+});
+var StoryDraftSchema = external_exports.object({
+  basic: StoryBasicSchema,
+  world: StoryWorldSchema,
+  characters: external_exports.array(StoryCharacterSchema),
+  events: external_exports.array(StoryEventSchema),
+  // 이벤트 맵에서 옮긴 노드 위치. 없는 이벤트는 화면이 흐름대로 놓아요.
+  layout: external_exports.record(external_exports.string(), external_exports.object({ x: external_exports.number(), y: external_exports.number() })).optional()
+});
+
 // dist/connection.js
-import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
-import { homedir, hostname as hostname3 } from "node:os";
-import { join } from "node:path";
+import { mkdir as mkdir2, readFile as readFile2, rm as rm2, writeFile as writeFile2 } from "node:fs/promises";
+import { homedir as homedir2, hostname as hostname3 } from "node:os";
+import { join as join2 } from "node:path";
+
+// dist/runner-install.js
+import { execFile } from "node:child_process";
+import { access, copyFile, mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { homedir } from "node:os";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { promisify } from "node:util";
+var run = promisify(execFile);
+var LABEL = "app.softbox.runner";
+var RUNNER_DIR = join(homedir(), ".softbox", "runner");
+var DISABLED_PATH = join(RUNNER_DIR, "disabled");
+var PLIST_PATH = join(homedir(), "Library", "LaunchAgents", `${LABEL}.plist`);
+var HERE = dirname(fileURLToPath(import.meta.url));
+var RUNNER_FILES = ["runner.js", "connection.js"];
+var CODEX_CANDIDATES = [
+  process.env.CODEX_CLI_PATH,
+  "/Applications/ChatGPT.app/Contents/Resources/codex",
+  "/Applications/Codex.app/Contents/Resources/codex",
+  "/opt/homebrew/bin/codex",
+  "/usr/local/bin/codex"
+];
+async function exists(path) {
+  return access(path).then(() => true, () => false);
+}
+async function findCodex() {
+  for (const candidate of CODEX_CANDIDATES) {
+    if (candidate?.startsWith("/") && await exists(candidate))
+      return candidate;
+  }
+  return null;
+}
+var escapeXml = (value) => value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+function plist(env) {
+  const entries = Object.entries(env).map(([key, value]) => `      <key>${key}</key>
+      <string>${escapeXml(value)}</string>`).join("\n");
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>Label</key>
+    <string>${LABEL}</string>
+    <key>ProgramArguments</key>
+    <array>
+      <string>${escapeXml(process.execPath)}</string>
+      <string>${escapeXml(join(RUNNER_DIR, "runner.js"))}</string>
+    </array>
+    <key>EnvironmentVariables</key>
+    <dict>
+${entries}
+    </dict>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>ThrottleInterval</key>
+    <integer>60</integer>
+    <key>ProcessType</key>
+    <string>Background</string>
+    <key>StandardOutPath</key>
+    <string>${escapeXml(join(RUNNER_DIR, "runner.log"))}</string>
+    <key>StandardErrorPath</key>
+    <string>${escapeXml(join(RUNNER_DIR, "runner.log"))}</string>
+  </dict>
+</plist>
+`;
+}
+var domain2 = () => `gui/${process.getuid?.() ?? 0}`;
+async function isLoaded() {
+  return run("launchctl", ["print", `${domain2()}/${LABEL}`]).then(() => true, () => false);
+}
+async function unload() {
+  await run("launchctl", ["bootout", `${domain2()}/${LABEL}`]).catch(() => void 0);
+}
+async function ensureRunner() {
+  if (process.platform !== "darwin")
+    return "unavailable";
+  if (await exists(DISABLED_PATH))
+    return "off";
+  const codex = await findCodex();
+  if (!codex)
+    return "unavailable";
+  const env = { HOME: homedir(), SOFTBOX_CODEX_PATH: codex };
+  if (process.env.SOFTBOX_URL)
+    env.SOFTBOX_URL = process.env.SOFTBOX_URL;
+  const nextPlist = plist(env);
+  await mkdir(RUNNER_DIR, { recursive: true, mode: 448 });
+  let changed = await readFile(PLIST_PATH, "utf8").catch(() => "") !== nextPlist;
+  for (const file2 of RUNNER_FILES) {
+    const source = join(HERE, file2);
+    if (!await exists(source))
+      continue;
+    const target = join(RUNNER_DIR, file2);
+    const [next, current] = await Promise.all([
+      readFile(source),
+      readFile(target).catch(() => null)
+    ]);
+    if (current && next.equals(current))
+      continue;
+    await copyFile(source, target);
+    changed = true;
+  }
+  if (!changed && await isLoaded())
+    return "on";
+  await mkdir(dirname(PLIST_PATH), { recursive: true });
+  await writeFile(PLIST_PATH, nextPlist);
+  await unload();
+  await run("launchctl", ["bootstrap", domain2(), PLIST_PATH]);
+  return "on";
+}
+async function removeRunner({ keepOff }) {
+  if (process.platform !== "darwin")
+    return;
+  await unload();
+  await rm(PLIST_PATH, { force: true });
+  if (keepOff) {
+    await mkdir(RUNNER_DIR, { recursive: true, mode: 448 });
+    await writeFile(DISABLED_PATH, "");
+  }
+}
+async function enableRunner() {
+  await rm(DISABLED_PATH, { force: true });
+  return ensureRunner();
+}
+async function runnerState() {
+  if (process.platform !== "darwin")
+    return "unavailable";
+  if (await exists(DISABLED_PATH))
+    return "off";
+  return await isLoaded() ? "on" : "off";
+}
+
+// dist/connection.js
 var BASE_URL = (process.env.SOFTBOX_URL ?? "https://softbox-capture.vercel.app").replace(/\/$/, "");
-var CREDENTIALS_DIR = join(homedir(), ".softbox");
-var CREDENTIALS_PATH = join(CREDENTIALS_DIR, "credentials.json");
+var CREDENTIALS_DIR = join2(homedir2(), ".softbox");
+var CREDENTIALS_PATH = join2(CREDENTIALS_DIR, "credentials.json");
 var POLL_MS = 3e3;
-var pending = null;
+var PAIRING_GRACE_MS = 6e4;
+var PAIRING_PATH = join2(CREDENTIALS_DIR, "pairing.json");
 async function readCredentials() {
   try {
-    const saved = JSON.parse(await readFile(CREDENTIALS_PATH, "utf8"));
+    const saved = JSON.parse(await readFile2(CREDENTIALS_PATH, "utf8"));
     return saved.baseUrl === BASE_URL ? saved : null;
   } catch {
     return null;
   }
 }
-async function saveCredentials(credentials) {
-  await mkdir(CREDENTIALS_DIR, { recursive: true, mode: 448 });
-  await writeFile(CREDENTIALS_PATH, JSON.stringify(credentials, null, 2), { mode: 384 });
+async function writePrivate(path, value) {
+  await mkdir2(CREDENTIALS_DIR, { recursive: true, mode: 448 });
+  await writeFile2(path, JSON.stringify(value, null, 2), { mode: 384 });
+}
+async function readPairing() {
+  try {
+    const saved = JSON.parse(await readFile2(PAIRING_PATH, "utf8"));
+    return saved.baseUrl === BASE_URL ? saved : null;
+  } catch {
+    return null;
+  }
+}
+var isLive = (pairing) => new Date(pairing.expiresAt).getTime() > Date.now();
+var claiming = null;
+function claimPairing() {
+  claiming ??= (async () => {
+    const pairing = await readPairing();
+    if (!pairing)
+      return;
+    const response = await fetch(`${BASE_URL}/api/plugin/pairings/token`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ code: pairing.code, secret: pairing.secret })
+    }).catch(() => null);
+    if (!response || response.status === 202 || response.status >= 500)
+      return;
+    if (response.ok) {
+      const approved = await response.json();
+      await writePrivate(CREDENTIALS_PATH, {
+        baseUrl: BASE_URL,
+        token: approved.token,
+        deviceName: approved.deviceName,
+        email: approved.email
+      });
+      void ensureRunner().catch(() => void 0);
+    }
+    await rm2(PAIRING_PATH, { force: true });
+  })().finally(() => {
+    claiming = null;
+  });
+  return claiming;
 }
 async function authedFetch(path, init = {}) {
-  const credentials = await readCredentials();
+  let credentials = await readCredentials();
+  if (!credentials) {
+    await claimPairing();
+    credentials = await readCredentials();
+  }
   if (!credentials)
     return null;
   return fetch(`${BASE_URL}${path}`, {
@@ -36643,8 +36899,10 @@ function defaultDeviceName() {
   return hostname3().replace(/\.local$/, "").slice(0, 60) || "Codex \uAE30\uAE30";
 }
 async function startPairing() {
-  if (pending && new Date(pending.expiresAt).getTime() > Date.now()) {
-    return { code: pending.code, approveUrl: pending.approveUrl, expiresAt: pending.expiresAt };
+  const saved = await readPairing();
+  if (saved && isLive(saved)) {
+    watchApproval();
+    return { code: saved.code, approveUrl: saved.approveUrl, expiresAt: saved.expiresAt };
   }
   const response = await fetch(`${BASE_URL}/api/plugin/pairings`, {
     method: "POST",
@@ -36654,40 +36912,36 @@ async function startPairing() {
   if (!response.ok)
     throw new Error(`Softbox\uC5D0 \uC5F0\uACB0\uC744 \uC694\uCCAD\uD558\uC9C0 \uBABB\uD588\uC5B4\uC694 (${response.status}).`);
   const started = await response.json();
-  pending = started;
-  void waitForApproval(started);
+  await writePrivate(PAIRING_PATH, { ...started, baseUrl: BASE_URL });
+  watchApproval();
   return { code: started.code, approveUrl: started.approveUrl, expiresAt: started.expiresAt };
 }
-async function waitForApproval(request) {
-  while (pending === request && new Date(request.expiresAt).getTime() > Date.now()) {
-    await new Promise((resolve) => setTimeout(resolve, POLL_MS));
-    const response = await fetch(`${BASE_URL}/api/plugin/pairings/token`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ code: request.code, secret: request.secret })
-    }).catch(() => null);
-    if (!response || response.status === 202)
-      continue;
-    if (response.ok) {
-      const approved = await response.json();
-      await saveCredentials({
-        baseUrl: BASE_URL,
-        token: approved.token,
-        deviceName: approved.deviceName,
-        email: approved.email
-      });
+var watching = false;
+function watchApproval() {
+  if (watching)
+    return;
+  watching = true;
+  void (async () => {
+    try {
+      for (; ; ) {
+        await new Promise((resolve) => setTimeout(resolve, POLL_MS));
+        const pairing = await readPairing();
+        if (!pairing || new Date(pairing.expiresAt).getTime() + PAIRING_GRACE_MS < Date.now())
+          break;
+        await claimPairing();
+      }
+    } finally {
+      watching = false;
     }
-    break;
-  }
-  if (pending === request)
-    pending = null;
+  })();
 }
-function isPairing() {
-  return pending !== null;
+async function isPairing() {
+  const saved = await readPairing();
+  return saved !== null && isLive(saved);
 }
 async function forgetConnection() {
-  pending = null;
-  await rm(CREDENTIALS_PATH, { force: true });
+  await rm2(PAIRING_PATH, { force: true });
+  await rm2(CREDENTIALS_PATH, { force: true });
 }
 function formatCode(code) {
   return `${code.slice(0, 3)} \xB7 ${code.slice(3)}`;
@@ -36695,9 +36949,9 @@ function formatCode(code) {
 var SOFTBOX_URL = BASE_URL;
 
 // dist/jobs.js
-import { mkdir as mkdir2, readFile as readFile2, writeFile as writeFile2 } from "node:fs/promises";
-import { homedir as homedir2 } from "node:os";
-import { basename, join as join2 } from "node:path";
+import { mkdir as mkdir3, readFile as readFile3, writeFile as writeFile3 } from "node:fs/promises";
+import { homedir as homedir3 } from "node:os";
+import { basename, join as join3 } from "node:path";
 
 // dist/image.js
 function readImageInfo(bytes) {
@@ -36754,7 +37008,7 @@ function extensionFor(mimeType) {
 }
 
 // dist/jobs.js
-var JOBS_DIR = join2(homedir2(), ".softbox", "jobs");
+var JOBS_DIR = join3(homedir3(), ".softbox", "jobs");
 var NotConnectedError = class extends Error {
   constructor() {
     super("Softbox\uC5D0 \uC5F0\uACB0\uB418\uC9C0 \uC54A\uC558\uC5B4\uC694. softbox_connect\uB85C \uBA3C\uC800 \uC5F0\uACB0\uD574 \uC8FC\uC138\uC694.");
@@ -36770,8 +37024,8 @@ async function takeNextJob() {
   if (!job)
     return null;
   const parsed = CodexJobSchema.parse(job);
-  const dir = join2(JOBS_DIR, parsed.runId);
-  await mkdir2(dir, { recursive: true });
+  const dir = join3(JOBS_DIR, parsed.runId);
+  await mkdir3(dir, { recursive: true });
   const references = [];
   for (const [index, reference] of parsed.references.entries()) {
     const file2 = await fetch(reference.url);
@@ -36780,62 +37034,79 @@ async function takeNextJob() {
     const bytes = Buffer.from(await file2.arrayBuffer());
     const info = readImageInfo(bytes);
     const role = reference.role.replace(/[^\w-]/g, "_");
-    const path = join2(dir, `ref-${index + 1}-${role}.${extensionFor(info?.mimeType ?? "")}`);
-    await writeFile2(path, bytes);
+    const path = join3(dir, `ref-${index + 1}-${role}.${extensionFor(info?.mimeType ?? "")}`);
+    await writeFile3(path, bytes);
     references.push({ role: reference.role, path });
   }
   return { ...parsed, references };
 }
-async function submitJob(runId, files, reason) {
+async function uploadImages(runId, files) {
   const prepared = [];
-  for (const [index, path] of files.entries()) {
-    const bytes = await readFile2(path);
+  for (const { idx, path } of files) {
+    const bytes = await readFile3(path);
     const info = readImageInfo(bytes);
     if (!info)
       throw new Error(`${basename(path)}: PNG\xB7JPG\xB7WEBP \uC774\uBBF8\uC9C0\uB9CC \uC62C\uB9B4 \uC218 \uC788\uC5B4\uC694.`);
     if (bytes.length > LIMITS.imageBytesMax) {
       throw new Error(`${basename(path)}: 10MB \uC774\uD558\uB9CC \uC62C\uB9B4 \uC218 \uC788\uC5B4\uC694.`);
     }
-    prepared.push({ idx: index + 1, bytes, info });
+    prepared.push({ idx, bytes, info });
   }
+  if (prepared.length === 0)
+    return [];
+  const response = await authedFetch(`/api/plugin/jobs/${runId}/uploads`, {
+    method: "POST",
+    body: JSON.stringify({
+      files: prepared.map(({ idx, bytes, info }) => ({
+        idx,
+        mimeType: info.mimeType,
+        bytes: bytes.length
+      }))
+    })
+  });
+  if (!response || response.status === 401)
+    throw new NotConnectedError();
+  if (!response.ok)
+    throw new Error(`\uC62C\uB9B4 \uC900\uBE44\uB97C \uD558\uC9C0 \uBABB\uD588\uC5B4\uC694 (${response.status}).`);
+  const { uploads } = await response.json();
   const outputs = [];
-  if (prepared.length > 0) {
-    const response2 = await authedFetch(`/api/plugin/jobs/${runId}/uploads`, {
-      method: "POST",
-      body: JSON.stringify({
-        files: prepared.map(({ idx, bytes, info }) => ({
-          idx,
-          mimeType: info.mimeType,
-          bytes: bytes.length
-        }))
-      })
+  for (const upload of uploads) {
+    const file2 = prepared.find((item) => item.idx === upload.idx);
+    if (!file2)
+      continue;
+    const put = await fetch(upload.uploadUrl, {
+      method: "PUT",
+      headers: { "content-type": file2.info.mimeType },
+      body: file2.bytes
     });
-    if (!response2 || response2.status === 401)
-      throw new NotConnectedError();
-    if (!response2.ok)
-      throw new Error(`\uC62C\uB9B4 \uC900\uBE44\uB97C \uD558\uC9C0 \uBABB\uD588\uC5B4\uC694 (${response2.status}).`);
-    const { uploads } = await response2.json();
-    for (const upload of uploads) {
-      const file2 = prepared.find((item) => item.idx === upload.idx);
-      if (!file2)
-        continue;
-      const put = await fetch(upload.uploadUrl, {
-        method: "PUT",
-        headers: { "content-type": file2.info.mimeType },
-        body: file2.bytes
-      });
-      if (!put.ok)
-        throw new Error(`\uC774\uBBF8\uC9C0 ${upload.idx}\uBC88\uC744 \uC62C\uB9AC\uC9C0 \uBABB\uD588\uC5B4\uC694 (${put.status}).`);
-      outputs.push({
-        idx: upload.idx,
-        imageId: upload.imageId,
-        mimeType: file2.info.mimeType,
-        width: file2.info.width,
-        height: file2.info.height,
-        bytes: file2.bytes.length
-      });
-    }
+    if (!put.ok)
+      throw new Error(`\uC774\uBBF8\uC9C0 ${upload.idx}\uBC88\uC744 \uC62C\uB9AC\uC9C0 \uBABB\uD588\uC5B4\uC694 (${put.status}).`);
+    outputs.push({
+      idx: upload.idx,
+      imageId: upload.imageId,
+      mimeType: file2.info.mimeType,
+      width: file2.info.width,
+      height: file2.info.height,
+      bytes: file2.bytes.length
+    });
   }
+  return outputs;
+}
+async function addImage(runId, idx, path) {
+  const [output2] = await uploadImages(runId, [{ idx, path }]);
+  if (!output2)
+    throw new Error(`\uC774\uBBF8\uC9C0 ${idx}\uBC88\uC744 \uC62C\uB9AC\uC9C0 \uBABB\uD588\uC5B4\uC694.`);
+  const response = await authedFetch(`/api/plugin/jobs/${runId}/outputs`, {
+    method: "POST",
+    body: JSON.stringify(output2)
+  });
+  if (!response || response.status === 401)
+    throw new NotConnectedError();
+  if (!response.ok)
+    throw new Error(`\uC774\uBBF8\uC9C0 ${idx}\uBC88\uC73C\uB85C \uACB0\uACFC \uCE78\uC744 \uCC44\uC6B0\uC9C0 \uBABB\uD588\uC5B4\uC694 (${response.status}).`);
+}
+async function submitJob(runId, files, reason) {
+  const outputs = await uploadImages(runId, files.map((path, index) => ({ idx: index + 1, path })));
   const response = await authedFetch(`/api/plugin/jobs/${runId}/complete`, {
     method: "POST",
     body: JSON.stringify({ outputs, error: reason })
@@ -36845,7 +37116,7 @@ async function submitJob(runId, files, reason) {
   if (!response.ok)
     throw new Error(`\uC791\uC5C5\uC744 \uB9C8\uBB34\uB9AC\uD558\uC9C0 \uBABB\uD588\uC5B4\uC694 (${response.status}).`);
   const { status } = await response.json();
-  return { status, uploaded: outputs.length };
+  return { status };
 }
 async function listJobs() {
   const response = await authedFetch("/api/plugin/jobs");
@@ -36860,7 +37131,8 @@ async function listJobs() {
 // dist/procedure.js
 var SERVER_INSTRUCTIONS = [
   "Softbox is a web studio for planning and generating image assets for webtoon-style episodes.",
-  "When the user mentions Softbox (connecting, pending jobs, generating), use these tools: softbox_status, softbox_connect, softbox_next_job, softbox_submit.",
+  "When the user mentions Softbox (connecting, pending jobs, generating), use these tools: softbox_status, softbox_connect, softbox_auto_process, softbox_next_job, softbox_add_image, softbox_submit.",
+  "After connecting, queued jobs are processed automatically on this Mac; the user can turn that off with softbox_auto_process.",
   "Process Softbox jobs only with the procedure returned by softbox_next_job."
 ].join("\n");
 var JOB_PROCEDURE = [
@@ -36868,9 +37140,9 @@ var JOB_PROCEDURE = [
   "1. Use only Codex's built-in image generation. Do not use skills, workflows or tools from other plugins for this job, even if one looks related (for example a face variation lab).",
   `2. Follow recipe.brief as the prompt. Each reference's role says what it is for: "base" is the face to start from; hair, brows, eyes, nose and mouth are the parts to borrow.`,
   '3. Pass at most 5 reference images to one generation call. Always keep "base"; if there are more than 5, drop the parts with the lowest strength in recipe.parts.',
-  "4. Make requestedCount separate images. Each must be a different face that follows the brief.",
-  "5. Save them as PNG, JPEG or WEBP files under 10 MB. Do not edit the reference files.",
-  "6. Call softbox_submit with the runId and the file paths in order. If some images could not be made, submit the ones you have and give a short reason."
+  "4. Make requestedCount separate images, one at a time. Each must be a different face that follows the brief.",
+  "5. Right after each image is made, call softbox_add_image with the runId, its slot (1 for the first, 2 for the second, \u2026) and the file path, before making the next one. The user watches them appear one by one. Files must be PNG, JPEG or WEBP under 10 MB. Do not edit the reference files.",
+  "6. When done, call softbox_submit with the runId and an empty files list. If some images could not be made, give a short reason."
 ].join("\n");
 
 // dist/widget.js
@@ -37052,20 +37324,25 @@ var WIDGET_HTML = (
 // dist/server.js
 var server = new McpServer(
   // 묶을 때(scripts/package.mjs) 플러그인 버전을 넣어요.
-  { name: "softbox", version: "0.1.0" },
+  { name: "softbox", version: "0.2.0" },
   { instructions: SERVER_INSTRUCTIONS }
 );
-var text = (value) => ({ content: [{ type: "text", text: value }] });
+var text2 = (value) => ({ content: [{ type: "text", text: value }] });
+var RUNNER_LABELS = {
+  on: "\uCF1C\uC9D0 (\uC6F9\uC5D0\uC11C \uC694\uCCAD\uD558\uBA74 \uC774 Mac\uC758 Codex\uAC00 \uBC14\uB85C \uCC98\uB9AC\uD574\uC694)",
+  off: "\uAEBC\uC9D0",
+  unavailable: "\uC774 \uAE30\uAE30\uC5D0\uC11C\uB294 \uC4F8 \uC218 \uC5C6\uC5B4\uC694"
+};
 server.registerTool("softbox_status", {
   title: "Softbox \uC5F0\uACB0 \uC0C1\uD0DC",
   description: "Report whether this Codex plugin is connected to a Softbox account."
 }, async () => {
   const account = await currentAccount();
   if (!account) {
-    return text(isPairing() ? "Softbox \uC5F0\uACB0\uC744 \uAE30\uB2E4\uB9AC\uACE0 \uC788\uC5B4\uC694. \uBE0C\uB77C\uC6B0\uC800\uC5D0\uC11C \uC2B9\uC778\uD574 \uC8FC\uC138\uC694." : "Softbox\uC5D0 \uC5F0\uACB0\uB418\uC9C0 \uC54A\uC558\uC5B4\uC694. softbox_connect\uB85C \uC5F0\uACB0\uD574 \uC8FC\uC138\uC694.");
+    return text2(await isPairing() ? "Softbox \uC5F0\uACB0\uC744 \uAE30\uB2E4\uB9AC\uACE0 \uC788\uC5B4\uC694. \uBE0C\uB77C\uC6B0\uC800\uC5D0\uC11C \uC2B9\uC778\uD574 \uC8FC\uC138\uC694." : "Softbox\uC5D0 \uC5F0\uACB0\uB418\uC9C0 \uC54A\uC558\uC5B4\uC694. softbox_connect\uB85C \uC5F0\uACB0\uD574 \uC8FC\uC138\uC694.");
   }
   const workspaces = account.workspaces.map((w) => w.name).join(", ") || "\uC5C6\uC74C";
-  return text(`${account.email ?? "\uC54C \uC218 \uC5C6\uB294 \uACC4\uC815"}\uC73C\uB85C \uC5F0\uACB0\uB410\uC5B4\uC694. \uAE30\uAE30: ${account.deviceName}. \uC6CC\uD06C\uC2A4\uD398\uC774\uC2A4: ${workspaces}.`);
+  return text2(`${account.email ?? "\uC54C \uC218 \uC5C6\uB294 \uACC4\uC815"}\uC73C\uB85C \uC5F0\uACB0\uB410\uC5B4\uC694. \uAE30\uAE30: ${account.deviceName}. \uC6CC\uD06C\uC2A4\uD398\uC774\uC2A4: ${workspaces}. \uC790\uB3D9 \uCC98\uB9AC: ${RUNNER_LABELS[await runnerState()]}.`);
 });
 server.registerTool("softbox_connect", {
   title: "Softbox \uC5F0\uACB0\uD558\uAE30",
@@ -37073,9 +37350,9 @@ server.registerTool("softbox_connect", {
 }, async () => {
   const account = await currentAccount();
   if (account)
-    return text(`\uC774\uBBF8 ${account.email ?? "\uACC4\uC815"}\uC73C\uB85C \uC5F0\uACB0\uB3FC \uC788\uC5B4\uC694.`);
+    return text2(`\uC774\uBBF8 ${account.email ?? "\uACC4\uC815"}\uC73C\uB85C \uC5F0\uACB0\uB3FC \uC788\uC5B4\uC694.`);
   const { code, approveUrl } = await startPairing();
-  return text([
+  return text2([
     `\uC5F0\uACB0 \uCF54\uB4DC: ${formatCode(code)}`,
     `\uBE0C\uB77C\uC6B0\uC800\uC5D0\uC11C \uC544\uB798 \uC8FC\uC18C\uB97C \uC5F4\uACE0 \uAC19\uC740 \uCF54\uB4DC\uC778\uC9C0 \uD655\uC778\uD55C \uB4A4 \uC2B9\uC778\uD574 \uC8FC\uC138\uC694. \uCF54\uB4DC\uB294 10\uBD84 \uB3D9\uC548 \uC720\uD6A8\uD574\uC694.`,
     approveUrl
@@ -37086,42 +37363,75 @@ server.registerTool("softbox_disconnect", {
   description: "Forget the Softbox connection saved on this device. To revoke the device on the server, use Settings > Connected devices on the web."
 }, async () => {
   await forgetConnection();
-  return text(`\uC774 \uAE30\uAE30\uC758 \uC5F0\uACB0\uC744 \uC9C0\uC6E0\uC5B4\uC694. \uC6F9\uC758 \uAE30\uAE30 \uBAA9\uB85D\uC5D0\uC11C\uB3C4 \uBE7C\uB824\uBA74 ${SOFTBOX_URL}/settings/devices \uC5D0\uC11C \uC5F0\uACB0\uC744 \uB04A\uC5B4 \uC8FC\uC138\uC694.`);
+  await removeRunner({ keepOff: false });
+  return text2(`\uC774 \uAE30\uAE30\uC758 \uC5F0\uACB0\uC744 \uC9C0\uC6E0\uC5B4\uC694. \uC6F9\uC758 \uAE30\uAE30 \uBAA9\uB85D\uC5D0\uC11C\uB3C4 \uBE7C\uB824\uBA74 ${SOFTBOX_URL}/settings/devices \uC5D0\uC11C \uC5F0\uACB0\uC744 \uB04A\uC5B4 \uC8FC\uC138\uC694.`);
+});
+server.registerTool("softbox_auto_process", {
+  title: "Softbox \uC790\uB3D9 \uCC98\uB9AC \uCF1C\uACE0 \uB044\uAE30",
+  description: "Turn automatic processing on or off. When on, a background helper on this Mac runs Codex whenever a Softbox job is queued, so the user does not have to ask. It is on by default after connecting.",
+  inputSchema: { enabled: external_exports.boolean().describe("true to turn on, false to turn off") }
+}, async ({ enabled }) => {
+  if (!enabled) {
+    await removeRunner({ keepOff: true });
+    return text2('\uC790\uB3D9 \uCC98\uB9AC\uB97C \uAED0\uC5B4\uC694. \uB300\uAE30 \uC791\uC5C5\uC740 Codex\uC5D0 "Softbox \uB300\uAE30 \uC791\uC5C5 \uCC98\uB9AC\uD574 \uC918"\uB77C\uACE0 \uD558\uBA74 \uCC98\uB9AC\uD574\uC694.');
+  }
+  if (!await currentAccount())
+    return text2("\uBA3C\uC800 softbox_connect\uB85C \uC5F0\uACB0\uD574 \uC8FC\uC138\uC694.");
+  const state = await enableRunner();
+  return text2(`\uC790\uB3D9 \uCC98\uB9AC: ${RUNNER_LABELS[state]}.`);
 });
 server.registerTool("softbox_next_job", {
   title: "\uB2E4\uC74C \uC0DD\uC131 \uC791\uC5C5 \uBC1B\uAE30",
-  description: "Take the oldest queued Softbox image job for this account. Returns the procedure to follow, the workflow, recipe, how many images to make, and local paths of reference images. Generate the images with Codex's built-in image generation only, then call softbox_submit with the run id and file paths."
+  description: "Take the oldest queued Softbox image job for this account. Returns the procedure to follow, the workflow, recipe, how many images to make, and local paths of reference images. Generate the images one at a time with Codex's built-in image generation only, send each with softbox_add_image as soon as it is made, then finish with softbox_submit."
 }, async () => {
   try {
     const job = await takeNextJob();
     if (!job)
-      return text("\uB300\uAE30 \uC911\uC778 \uC0DD\uC131 \uC791\uC5C5\uC774 \uC5C6\uC5B4\uC694.");
-    return text([
+      return text2("\uB300\uAE30 \uC911\uC778 \uC0DD\uC131 \uC791\uC5C5\uC774 \uC5C6\uC5B4\uC694.");
+    return text2([
       `\uC791\uC5C5 ${job.runId}: ${job.workflow}, \uC774\uBBF8\uC9C0 ${job.requestedCount}\uC7A5\uC744 \uB9CC\uB4E4\uC5B4 \uC8FC\uC138\uC694.`,
       JOB_PROCEDURE,
       JSON.stringify(job, null, 2)
     ].join("\n"));
   } catch (error62) {
     if (error62 instanceof NotConnectedError)
-      return text(error62.message);
+      return text2(error62.message);
+    throw error62;
+  }
+});
+server.registerTool("softbox_add_image", {
+  title: "\uC0DD\uC131 \uACB0\uACFC \uD55C \uC7A5 \uC62C\uB9AC\uAE30",
+  description: "Upload one generated image for a Softbox job right after it is made, so the user sees it on the web immediately. Slot is 1 for the first image, 2 for the second, and so on. Call softbox_submit once all images are done.",
+  inputSchema: {
+    runId: external_exports.string().uuid().describe("Job id from softbox_next_job"),
+    slot: external_exports.number().int().min(1).max(8).describe("Result slot number, starting at 1"),
+    file: external_exports.string().describe("Absolute path of the generated PNG, JPG or WEBP file")
+  }
+}, async ({ runId, slot, file: file2 }) => {
+  try {
+    await addImage(runId, slot, file2);
+    return text2(`${slot}\uBC88 \uC774\uBBF8\uC9C0\uB97C \uC62C\uB838\uC5B4\uC694. \uC6F9\uC5D0 \uBC14\uB85C \uB5A0\uC694.`);
+  } catch (error62) {
+    if (error62 instanceof NotConnectedError)
+      return text2(error62.message);
     throw error62;
   }
 });
 server.registerTool("softbox_submit", {
-  title: "\uC0DD\uC131 \uACB0\uACFC \uC62C\uB9AC\uAE30",
-  description: "Upload generated images for a Softbox job and finish it. Files fill result slots 1, 2, \u2026 in order. If nothing could be generated, pass an empty files list and a short reason such as quota_exceeded.",
+  title: "\uC0DD\uC131 \uC791\uC5C5 \uB05D\uB0B4\uAE30",
+  description: "Finish a Softbox job. Images already sent with softbox_add_image count; pass an empty files list in that case. Files given here fill result slots 1, 2, \u2026 in order. If some or all images could not be made, give a short reason such as quota_exceeded.",
   inputSchema: {
     runId: external_exports.string().uuid().describe("Job id from softbox_next_job"),
-    files: external_exports.array(external_exports.string()).max(8).describe("Absolute paths of generated PNG, JPG or WEBP files"),
+    files: external_exports.array(external_exports.string()).max(8).describe("Absolute paths of images not yet sent with softbox_add_image; usually empty"),
     reason: external_exports.string().max(60).optional().describe("Why images are missing, e.g. quota_exceeded")
   }
 }, async ({ runId, files, reason }) => {
   try {
-    const { status, uploaded } = await submitJob(runId, files, reason);
-    return text(status === "completed" ? `${uploaded}\uC7A5\uC744 \uC62C\uB9AC\uACE0 \uC791\uC5C5\uC744 \uB05D\uB0C8\uC5B4\uC694. \uC6F9\uC5D0 \uBC14\uB85C \uB5A0\uC694.` : `\uC791\uC5C5\uC744 \uC2E4\uD328\uB85C \uB2EB\uC558\uC5B4\uC694${reason ? ` (${reason})` : ""}.`);
+    const { status } = await submitJob(runId, files, reason);
+    return text2(status === "completed" ? "\uC791\uC5C5\uC744 \uB05D\uB0C8\uC5B4\uC694. \uACB0\uACFC\uB294 \uC6F9\uC5D0 \uC788\uC5B4\uC694." : `\uC791\uC5C5\uC744 \uC2E4\uD328\uB85C \uB2EB\uC558\uC5B4\uC694${reason ? ` (${reason})` : ""}.`);
   } catch (error62) {
     if (error62 instanceof NotConnectedError)
-      return text(error62.message);
+      return text2(error62.message);
     throw error62;
   }
 });
@@ -37172,3 +37482,4 @@ server.registerTool("softbox_widget", {
   return { content: [{ type: "text", text: summary }], structuredContent: state };
 });
 await server.connect(new StdioServerTransport());
+void currentAccount().then((account) => account ? ensureRunner() : void 0).catch(() => void 0);
