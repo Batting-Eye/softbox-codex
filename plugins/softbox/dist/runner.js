@@ -206,6 +206,7 @@ var LAST_RUN_LOG = join3(RUNNER_DIR, "last-run.log");
 var IDLE_MS = 6e4;
 var RUN_TIMEOUT_MS = 30 * 6e4;
 var MAX_BACKOFF_MS = 15 * 6e4;
+var DISABLED_MCP_SERVERS = ["cua_repl"];
 var PROMPT = [
   "Softbox \uB300\uAE30 \uC791\uC5C5\uC744 \uBAA8\uB450 \uCC98\uB9AC\uD574 \uC918.",
   "softbox_next_job\uC73C\uB85C \uC791\uC5C5\uC744 \uD558\uB098\uC529 \uBC1B\uC544, \uD568\uAED8 \uC624\uB294 \uC808\uCC28\uB300\uB85C \uC774\uBBF8\uC9C0\uB97C \uD55C \uC7A5\uC529 \uB9CC\uB4E4\uC5B4 \uB9CC\uB4E4 \uB54C\uB9C8\uB2E4 softbox_add_image\uB85C \uC62C\uB9AC\uACE0, \uB2E4 \uB418\uBA74 softbox_submit\uC73C\uB85C \uB05D\uB0B4.",
@@ -242,6 +243,10 @@ async function runCodex() {
         "read-only",
         "-c",
         'approval_policy="never"',
+        ...DISABLED_MCP_SERVERS.flatMap((name) => [
+          "-c",
+          `mcp_servers.${name}={command="/usr/bin/true",enabled=false}`
+        ]),
         "-C",
         WORK_DIR,
         PROMPT
