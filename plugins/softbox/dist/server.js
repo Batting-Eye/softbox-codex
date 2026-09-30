@@ -27064,9 +27064,9 @@ var numberProcessor = (schema, ctx, _json, params) => {
   json2.type = isInt ? "integer" : "number";
   const exMin = typeof exclusiveMinimum === "number" && exclusiveMinimum >= (minimum ?? Number.NEGATIVE_INFINITY);
   const exMax = typeof exclusiveMaximum === "number" && exclusiveMaximum <= (maximum ?? Number.POSITIVE_INFINITY);
-  const legacy = ctx.target === "draft-04" || ctx.target === "openapi-3.0";
+  const legacy2 = ctx.target === "draft-04" || ctx.target === "openapi-3.0";
   if (exMin) {
-    if (legacy) {
+    if (legacy2) {
       json2.minimum = exclusiveMinimum;
       json2.exclusiveMinimum = true;
     } else {
@@ -27076,7 +27076,7 @@ var numberProcessor = (schema, ctx, _json, params) => {
     json2.minimum = minimum;
   }
   if (exMax) {
-    if (legacy) {
+    if (legacy2) {
       json2.maximum = exclusiveMaximum;
       json2.exclusiveMaximum = true;
     } else {
@@ -36526,13 +36526,19 @@ var LIMITS = {
   referenceImagesMax: 5
 };
 var FACE_PARTS = ["hair", "brows", "eyes", "nose", "mouth"];
-var FACE_AGES = ["keep", "teens", "20s", "30s", "40s", "50s"];
+var FACE_AGES = ["keep", "20s", "30s", "40s", "50s", "60s"];
 var SKIN_TONES = [
   "keep",
-  "fairer",
-  "slightly_fairer",
-  "slightly_deeper",
-  "deeper"
+  "mst1",
+  "mst2",
+  "mst3",
+  "mst4",
+  "mst5",
+  "mst6",
+  "mst7",
+  "mst8",
+  "mst9",
+  "mst10"
 ];
 
 // ../../packages/shared/dist/schemas.js
@@ -36573,17 +36579,28 @@ var CodexJobSchema = external_exports.object({
   recipe: external_exports.record(external_exports.string(), external_exports.unknown()),
   references: external_exports.array(external_exports.object({
     role: external_exports.string(),
-    // 짧게 유효한 서명 URL. 플러그인이 로컬 파일로 받아요.
+    // 짧게 유효한 서명 URL, 또는 서버가 잘라 낸 부위 이미지의 data URL. 플러그인이 로컬 파일로 받아요.
     url: external_exports.string().url()
   }))
 });
 var percent = external_exports.number().int().min(0).max(100);
+var LEGACY_AGES = { teens: "20s" };
+var LEGACY_SKIN_TONES = {
+  fairer: "mst2",
+  slightly_fairer: "mst4",
+  slightly_deeper: "mst6",
+  deeper: "mst8"
+};
+var legacy = (map2) => (value) => typeof value === "string" ? map2[value] ?? value : value;
 var FaceVariationRecipeSchema = external_exports.object({
+  // 기준 얼굴과의 인상 거리(Identity Distance)
   change: percent,
+  // 전체 변화 강도(Overall Variation). 아직 화면에서 고르지 않고 기본값을 써요.
+  variation: percent.default(55),
   // 참고 이미지를 넣은 부위만 강도가 있어요.
   parts: external_exports.partialRecord(external_exports.enum(FACE_PARTS), percent),
-  age: external_exports.enum(FACE_AGES),
-  skinTone: external_exports.enum(SKIN_TONES),
+  age: external_exports.preprocess(legacy(LEGACY_AGES), external_exports.enum(FACE_AGES)),
+  skinTone: external_exports.preprocess(legacy(LEGACY_SKIN_TONES), external_exports.enum(SKIN_TONES)),
   ageHairColor: external_exports.boolean(),
   brief: external_exports.string()
 });
@@ -36949,9 +36966,10 @@ function formatCode(code) {
 var SOFTBOX_URL = BASE_URL;
 
 // dist/jobs.js
-import { mkdir as mkdir3, readFile as readFile3, writeFile as writeFile3 } from "node:fs/promises";
+import { access as access2, mkdir as mkdir3, readFile as readFile3, writeFile as writeFile3 } from "node:fs/promises";
 import { homedir as homedir3 } from "node:os";
-import { basename, join as join3 } from "node:path";
+import { basename, dirname as dirname2, join as join3 } from "node:path";
+import { fileURLToPath as fileURLToPath2 } from "node:url";
 
 // dist/image.js
 function readImageInfo(bytes) {
@@ -37014,6 +37032,24 @@ var NotConnectedError = class extends Error {
     super("Softbox\uC5D0 \uC5F0\uACB0\uB418\uC9C0 \uC54A\uC558\uC5B4\uC694. softbox_connect\uB85C \uBA3C\uC800 \uC5F0\uACB0\uD574 \uC8FC\uC138\uC694.");
   }
 };
+var HERE2 = dirname2(fileURLToPath2(import.meta.url));
+var LAYOUT_DIRS = [
+  join3(HERE2, "..", "assets", "layout"),
+  join3(HERE2, "..", "codex-plugin", "assets", "layout")
+];
+var LAYOUT_FILES = { layout_female: "dummy_female.png", layout_male: "dummy_male.png" };
+async function layoutReferences() {
+  for (const dir of LAYOUT_DIRS) {
+    const refs = Object.entries(LAYOUT_FILES).map(([role, file2]) => ({
+      role,
+      path: join3(dir, file2)
+    }));
+    const found = await Promise.all(refs.map((ref) => access2(ref.path).then(() => true, () => false)));
+    if (found.every(Boolean))
+      return refs;
+  }
+  return [];
+}
 async function takeNextJob() {
   const response = await authedFetch("/api/plugin/jobs/next", { method: "POST", body: "{}" });
   if (!response || response.status === 401)
@@ -37038,6 +37074,8 @@ async function takeNextJob() {
     await writeFile3(path, bytes);
     references.push({ role: reference.role, path });
   }
+  if (parsed.workflow === "face_variation")
+    references.push(...await layoutReferences());
   return { ...parsed, references };
 }
 async function uploadImages(runId, files) {
@@ -37138,8 +37176,8 @@ var SERVER_INSTRUCTIONS = [
 var JOB_PROCEDURE = [
   "How to process this Softbox job (follow exactly):",
   "1. Use only Codex's built-in image generation. Do not use skills, workflows or tools from other plugins for this job, even if one looks related (for example a face variation lab).",
-  `2. Follow recipe.brief as the prompt. Each reference's role says what it is for: "base" is the face to start from; hair, brows, eyes, nose and mouth are the parts to borrow.`,
-  '3. Pass at most 5 reference images to one generation call. Always keep "base"; if there are more than 5, drop the parts with the lowest strength in recipe.parts.',
+  `2. Use recipe.brief word for word as the prompt; do not shorten or paraphrase it. After it, add one line naming each reference image in the order you pass them (for example "Reference image 1 is BASE. Reference image 2 is the layout reference (framing only). Reference image 3 is the Eye reference, an eye-region crop.") and one line "This is image N of requestedCount." so the brief's direction N applies.`,
+  `3. Pass reference images in this order: "base" first; then the one layout reference (layout_female or layout_male) that matches the BASE person's gender; then the parts from the highest strength in recipe.parts. At most 5 per generation call: if there are more, leave out the layout reference first (BASE already has the same framing), then the parts with the lowest strength.`,
   "4. Make requestedCount separate images, one at a time. Each must be a different face that follows the brief.",
   "5. Right after each image is made, call softbox_add_image with the runId, its slot (1 for the first, 2 for the second, \u2026) and the file path, before making the next one. The user watches them appear one by one. Files must be PNG, JPEG or WEBP under 10 MB. Do not edit the reference files.",
   "6. When done, call softbox_submit with the runId and an empty files list. If some images could not be made, give a short reason."
@@ -37324,7 +37362,7 @@ var WIDGET_HTML = (
 // dist/server.js
 var server = new McpServer(
   // 묶을 때(scripts/package.mjs) 플러그인 버전을 넣어요.
-  { name: "softbox", version: "0.2.1" },
+  { name: "softbox", version: "0.3.0" },
   { instructions: SERVER_INSTRUCTIONS }
 );
 var text2 = (value) => ({ content: [{ type: "text", text: value }] });
