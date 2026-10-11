@@ -36521,7 +36521,8 @@ var LIMITS = {
   imagesPerOrientation: 10,
   episodeThumbnailsMax: 10,
   imageBytesMax: 10 * 1024 * 1024,
-  requestedImagesMax: 8,
+  // 한 번에 요청하는 생성 장수. Codex가 한 장씩 만들어서 많으면 오래 걸려요.
+  requestedImagesMax: 3,
   // Codex(GPT Image 2.5) 이미지 생성이 한 번에 받는 참고 이미지 수. 기준 얼굴 포함
   referenceImagesMax: 5
 };
@@ -36714,7 +36715,7 @@ var RUNNER_DIR = join(homedir(), ".softbox", "runner");
 var DISABLED_PATH = join(RUNNER_DIR, "disabled");
 var PLIST_PATH = join(homedir(), "Library", "LaunchAgents", `${LABEL}.plist`);
 var HERE = dirname(fileURLToPath(import.meta.url));
-var RUNNER_FILES = ["runner.js", "connection.js"];
+var RUNNER_FILES = ["runner.js", "connection.js", "wake.js"];
 var CODEX_CANDIDATES = [
   process.env.CODEX_CLI_PATH,
   "/Applications/ChatGPT.app/Contents/Resources/codex",
@@ -36889,20 +36890,24 @@ function claimPairing() {
   });
   return claiming;
 }
-async function authedFetch(path, init = {}) {
+async function deviceToken() {
   let credentials = await readCredentials();
   if (!credentials) {
     await claimPairing();
     credentials = await readCredentials();
   }
-  if (!credentials)
+  return credentials?.token ?? null;
+}
+async function authedFetch(path, init = {}) {
+  const token = await deviceToken();
+  if (!token)
     return null;
   return fetch(`${BASE_URL}${path}`, {
     ...init,
     headers: {
       ...init.body ? { "content-type": "application/json" } : {},
       ...init.headers,
-      authorization: `Bearer ${credentials.token}`
+      authorization: `Bearer ${token}`
     }
   });
 }
@@ -37362,7 +37367,7 @@ var WIDGET_HTML = (
 // dist/server.js
 var server = new McpServer(
   // 묶을 때(scripts/package.mjs) 플러그인 버전을 넣어요.
-  { name: "softbox", version: "0.3.0" },
+  { name: "softbox", version: "0.4.0" },
   { instructions: SERVER_INSTRUCTIONS }
 );
 var text2 = (value) => ({ content: [{ type: "text", text: value }] });

@@ -24,7 +24,7 @@ var RUNNER_DIR = join(homedir(), ".softbox", "runner");
 var DISABLED_PATH = join(RUNNER_DIR, "disabled");
 var PLIST_PATH = join(homedir(), "Library", "LaunchAgents", `${LABEL}.plist`);
 var HERE = dirname(fileURLToPath(import.meta.url));
-var RUNNER_FILES = ["runner.js", "connection.js"];
+var RUNNER_FILES = ["runner.js", "connection.js", "wake.js"];
 var CODEX_CANDIDATES = [
   process.env.CODEX_CLI_PATH,
   "/Applications/ChatGPT.app/Contents/Resources/codex",
@@ -181,22 +181,109 @@ function claimPairing() {
   });
   return claiming;
 }
-async function authedFetch(path, init = {}) {
+async function deviceToken() {
   let credentials = await readCredentials();
   if (!credentials) {
     await claimPairing();
     credentials = await readCredentials();
   }
-  if (!credentials)
+  return credentials?.token ?? null;
+}
+async function authedFetch(path, init = {}) {
+  const token = await deviceToken();
+  if (!token)
     return null;
   return fetch(`${BASE_URL}${path}`, {
     ...init,
     headers: {
       ...init.body ? { "content-type": "application/json" } : {},
       ...init.headers,
-      authorization: `Bearer ${credentials.token}`
+      authorization: `Bearer ${token}`
     }
   });
+}
+async function currentAccount() {
+  const response = await authedFetch("/api/plugin/me");
+  if (!response?.ok)
+    return null;
+  return await response.json();
+}
+
+// dist/wake.js
+var HEARTBEAT_MS = 25e3;
+var MAX_RECONNECT_MS = 6e4;
+async function runnerCheck(backend, token) {
+  const response = await fetch(`${backend.url}/rest/v1/rpc/runner_check`, {
+    method: "POST",
+    headers: { apikey: backend.key, "content-type": "application/json" },
+    body: JSON.stringify({ p_token: token })
+  });
+  if (!response.ok)
+    throw new Error(`runner_check ${response.status}`);
+  return await response.json();
+}
+function listenForJobs(backend, topic, listener) {
+  const channel = `realtime:${topic}`;
+  const endpoint = `${backend.url.replace(/^http/, "ws")}/realtime/v1/websocket?apikey=${encodeURIComponent(backend.key)}&vsn=1.0.0`;
+  let socket = null;
+  let stopped = false;
+  let attempts = 0;
+  let ref = 0;
+  const connect = () => {
+    const ws = new WebSocket(endpoint);
+    socket = ws;
+    let joinRef = "";
+    let heartbeatRef = null;
+    let heartbeat;
+    const send = (topicName, event, payload) => {
+      const messageRef = String(++ref);
+      ws.send(JSON.stringify({ topic: topicName, event, payload, ref: messageRef }));
+      return messageRef;
+    };
+    ws.onopen = () => {
+      joinRef = send(channel, "phx_join", {
+        config: { broadcast: { self: false }, private: false }
+      });
+      heartbeat = setInterval(() => {
+        if (heartbeatRef)
+          return ws.close();
+        heartbeatRef = send("phoenix", "heartbeat", {});
+      }, HEARTBEAT_MS);
+    };
+    ws.onmessage = (message) => {
+      const { event, payload, ref: messageRef, topic: messageTopic } = JSON.parse(String(message.data));
+      if (messageRef && messageRef === heartbeatRef) {
+        heartbeatRef = null;
+      } else if (messageRef === joinRef && event === "phx_reply") {
+        if (payload.status === "ok") {
+          attempts = 0;
+          listener.onJoined();
+        } else {
+          listener.onLost(`\uCC44\uB110\uC5D0 \uB4E4\uC5B4\uAC00\uC9C0 \uBABB\uD588\uC5B4\uC694: ${JSON.stringify(payload.response)}`);
+          ws.close();
+        }
+      } else if (messageTopic === channel && (event === "phx_error" || event === "phx_close")) {
+        ws.close();
+      } else if (event === "broadcast" && payload.event === "job") {
+        listener.onJob();
+      }
+    };
+    ws.onerror = () => void 0;
+    ws.onclose = () => {
+      clearInterval(heartbeat);
+      if (stopped)
+        return;
+      const delay = Math.min(1e3 * 2 ** attempts++, MAX_RECONNECT_MS);
+      if (attempts > 1)
+        listener.onLost(`\uC5F0\uACB0\uC774 \uB04A\uACBC\uC5B4\uC694. ${Math.round(delay / 1e3)}\uCD08 \uB4A4 \uB2E4\uC2DC \uBD99\uC5B4\uC694.`);
+      setTimeout(connect, delay);
+    };
+  };
+  connect();
+  return () => {
+    stopped = true;
+    socket?.close();
+  };
 }
 
 // dist/runner.js
@@ -204,6 +291,8 @@ var CODEX = process.env.SOFTBOX_CODEX_PATH ?? "codex";
 var WORK_DIR = join3(RUNNER_DIR, "work");
 var LAST_RUN_LOG = join3(RUNNER_DIR, "last-run.log");
 var IDLE_MS = 6e4;
+var SAFETY_MS = 30 * 6e4;
+var MIN_CHECK_MS = 5e3;
 var RUN_TIMEOUT_MS = 30 * 6e4;
 var MAX_BACKOFF_MS = 15 * 6e4;
 var DISABLED_MCP_SERVERS = ["cua_repl"];
@@ -215,21 +304,24 @@ var PROMPT = [
 ].join(" ");
 var sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 var log = (message) => console.log(`${(/* @__PURE__ */ new Date()).toISOString()} ${message}`);
-async function waitForJobs() {
-  const response = await authedFetch("/api/plugin/jobs/wait");
-  if (!response || response.status === 401)
-    return null;
-  if (!response.ok)
-    throw new Error(`jobs/wait ${response.status}`);
-  const { queued } = await response.json();
-  return queued;
+var signaled = false;
+var wake = null;
+function signal() {
+  signaled = true;
+  wake?.();
 }
-async function queuedNow() {
-  const response = await authedFetch("/api/plugin/jobs");
-  if (!response?.ok)
-    return null;
-  const { jobs } = await response.json();
-  return jobs.filter((job) => job.status === "queued").length;
+function waitForSignal(ms) {
+  if (signaled)
+    return Promise.resolve();
+  return new Promise((resolve) => {
+    const timer = setTimeout(done, ms);
+    function done() {
+      clearTimeout(timer);
+      wake = null;
+      resolve();
+    }
+    wake = done;
+  });
 }
 async function runCodex() {
   await mkdir3(WORK_DIR, { recursive: true });
@@ -266,34 +358,71 @@ async function runCodex() {
     await output.close();
   }
 }
+async function connectBackend() {
+  const token = await deviceToken();
+  if (!token)
+    return null;
+  const account = await currentAccount();
+  if (!account?.supabase)
+    return null;
+  return { backend: account.supabase, token };
+}
+async function serve(backend, token) {
+  let stop = null;
+  let topic = null;
+  let lastCheck = 0;
+  let backoff = 0;
+  try {
+    for (; ; ) {
+      await sleep(Math.max(0, lastCheck + MIN_CHECK_MS - Date.now()));
+      signaled = false;
+      lastCheck = Date.now();
+      const checked = await runnerCheck(backend, token);
+      if (!checked)
+        return;
+      if (checked.topic !== topic) {
+        stop?.();
+        topic = checked.topic;
+        stop = listenForJobs(backend, topic, {
+          onJoined: signal,
+          onJob: signal,
+          onLost: log
+        });
+        log("\uC791\uC5C5 \uC2E0\uD638\uB97C \uAE30\uB2E4\uB824\uC694.");
+      }
+      const { queued } = checked;
+      if (queued > 0) {
+        log(`\uB300\uAE30 \uC791\uC5C5 ${queued}\uAC74\uC744 Codex\uB85C \uCC98\uB9AC\uD574\uC694.`);
+        const code = await runCodex();
+        const left = (await runnerCheck(backend, token))?.queued ?? queued;
+        log(`Codex\uAC00 \uB05D\uB0AC\uC5B4\uC694 (\uC885\uB8CC \uCF54\uB4DC ${code}). \uB0A8\uC740 \uB300\uAE30 \uC791\uC5C5 ${left}\uAC74.`);
+        if (left >= queued) {
+          backoff = Math.min(backoff ? backoff * 2 : IDLE_MS, MAX_BACKOFF_MS);
+          log(`${Math.round(backoff / 1e3)}\uCD08 \uC26C\uC5C8\uB2E4\uAC00 \uB2E4\uC2DC \uD574\uC694. \uC790\uC138\uD55C \uB0B4\uC6A9\uC740 last-run.log\uC5D0 \uC788\uC5B4\uC694.`);
+          await sleep(backoff);
+          continue;
+        }
+        backoff = 0;
+        continue;
+      }
+      await waitForSignal(SAFETY_MS);
+    }
+  } finally {
+    stop?.();
+  }
+}
 async function main() {
   await trimLog();
   log(`\uC2E4\uD589\uAE30\uB97C \uCF30\uC5B4\uC694. Codex: ${CODEX}`);
-  let backoff = 0;
   for (; ; ) {
     try {
-      const queued = await waitForJobs();
-      if (queued === null) {
-        await sleep(IDLE_MS);
-        continue;
-      }
-      if (queued === 0)
-        continue;
-      log(`\uB300\uAE30 \uC791\uC5C5 ${queued}\uAC74\uC744 Codex\uB85C \uCC98\uB9AC\uD574\uC694.`);
-      const code = await runCodex();
-      const left = await queuedNow() ?? queued;
-      log(`Codex\uAC00 \uB05D\uB0AC\uC5B4\uC694 (\uC885\uB8CC \uCF54\uB4DC ${code}). \uB0A8\uC740 \uB300\uAE30 \uC791\uC5C5 ${left}\uAC74.`);
-      if (left >= queued) {
-        backoff = Math.min(backoff ? backoff * 2 : IDLE_MS, MAX_BACKOFF_MS);
-        log(`${Math.round(backoff / 1e3)}\uCD08 \uC26C\uC5C8\uB2E4\uAC00 \uB2E4\uC2DC \uD574\uC694. \uC790\uC138\uD55C \uB0B4\uC6A9\uC740 last-run.log\uC5D0 \uC788\uC5B4\uC694.`);
-        await sleep(backoff);
-      } else {
-        backoff = 0;
-      }
+      const connection = await connectBackend();
+      if (connection)
+        await serve(connection.backend, connection.token);
     } catch (error) {
       log(`\uC624\uB958: ${error instanceof Error ? error.message : String(error)}`);
-      await sleep(IDLE_MS);
     }
+    await sleep(IDLE_MS);
   }
 }
 await main();
