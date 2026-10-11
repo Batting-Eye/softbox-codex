@@ -36718,6 +36718,7 @@ var HERE = dirname(fileURLToPath(import.meta.url));
 var RUNNER_FILES = ["runner.js", "connection.js", "wake.js"];
 var CODEX_CANDIDATES = [
   process.env.CODEX_CLI_PATH,
+  "/Applications/ChatGPT.app/Contents/Resources/codex-cli/bin/codex",
   "/Applications/ChatGPT.app/Contents/Resources/codex",
   "/Applications/Codex.app/Contents/Resources/codex",
   "/opt/homebrew/bin/codex",
@@ -37367,7 +37368,7 @@ var WIDGET_HTML = (
 // dist/server.js
 var server = new McpServer(
   // 묶을 때(scripts/package.mjs) 플러그인 버전을 넣어요.
-  { name: "softbox", version: "0.4.0" },
+  { name: "softbox", version: "0.4.1" },
   { instructions: SERVER_INSTRUCTIONS }
 );
 var text2 = (value) => ({ content: [{ type: "text", text: value }] });

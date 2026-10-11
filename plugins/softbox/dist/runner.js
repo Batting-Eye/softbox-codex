@@ -27,6 +27,7 @@ var HERE = dirname(fileURLToPath(import.meta.url));
 var RUNNER_FILES = ["runner.js", "connection.js", "wake.js"];
 var CODEX_CANDIDATES = [
   process.env.CODEX_CLI_PATH,
+  "/Applications/ChatGPT.app/Contents/Resources/codex-cli/bin/codex",
   "/Applications/ChatGPT.app/Contents/Resources/codex",
   "/Applications/Codex.app/Contents/Resources/codex",
   "/opt/homebrew/bin/codex",
